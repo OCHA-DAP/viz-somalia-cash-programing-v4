@@ -992,7 +992,7 @@ $('#update').on('click', function(){
 
         if (selectedPeriod <= projEndPeriod) {
             config.sumField = '#targeted+'+month.toLowerCase();
-            config.transferValue = config.sumField;
+//             config.transferValue = config.sumField;
             config.color = '#1EBFB3';
             config.mapColorRange = mapColsProj;
             config.colorScale = colorScalerProj;

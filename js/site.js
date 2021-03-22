@@ -692,7 +692,7 @@ function generate3WComponent() {
 
         .dimension(dimCond)
         .group(groupCond)
-        .colors(config.colorScale3)
+        .colors(config.colorScale)
         .title(function (d) {
             return ;
         });

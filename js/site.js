@@ -230,15 +230,37 @@ var cashIPCDim,
 function mergeIPCPinData() {
     var yr = '2020'; 
     var label = '';
+    var ipcValidy = 'July-Septembre 2020';
 
     var month = $('.monthSelectionList').val();
     var year = $('.yearSelectionList').val();
 
     ['January', 'March'].includes(month) ? ipcRangePeriod = 'jan_mar' : 
-    ['April', 'May', 'June'].includes(month) ? ipcRangePeriod = 'apr_jun' : '';
+    ['April', 'May', 'June'].includes(month) ? ipcRangePeriod = 'apr_jun' :
+    ['July', 'August', 'September'].includes(month) ? ipcRangePeriod = 'jul_sep' :
+    ['October', 'November', 'December'].includes(month) ? ipcRangePeriod = 'oct_dec' : ''; 
 
 
-    yr == year ? label = ipcRangePeriod+'_'+yr : label = 'jul_sep_2020';
+    if (year == "2020") {
+        //en attendant d'avoir les donnees
+        ipcRangePeriod == 'oct_dec' ? ipcRangePeriod = 'jul_sep' : null;
+        
+        label = ipcRangePeriod+'_'+"2020";
+
+    } else if (year == "2021") {
+        ipcRangePeriod = 'jul_sep' ;
+        label = ipcRangePeriod+'_'+"2020";
+    } else {
+        ipcRangePeriod = 'jan_mar' ;
+        label = ipcRangePeriod+'_'+"2020";
+    }
+
+
+        
+    ipcRangePeriod == 'jan_mar' ? ipcValidy = 'January-March 2020' : 
+    ipcRangePeriod == 'apr_jun' ? ipcValidy = 'April-June 2020' : 
+    ipcRangePeriod == 'jul_sep' ? ipcValidy = 'July-September 2020' : 
+    ipcRangePeriod == 'oct_dec' ? ipcValidy = 'July-September 2020' : null;
     
     ipcData.forEach( function(element, index) {
         var pct_all = null,
@@ -273,9 +295,7 @@ function mergeIPCPinData() {
         element['#percentage+emergency'] = pct_emergency;
           
     });
-    var ipcValidy = 'July-Septembre 2020';
-    ipcRangePeriod == 'jan_mar' ? ipcValidy = 'January-March 2020' : 
-    ipcRangePeriod == 'apr_jun' ? ipcValidy = 'April-June 2020' : '';
+
 
     $('#ipc h4').text('Cash Assistance coverage - Assistance versus need (IPC '+ipcValidy+')');
  

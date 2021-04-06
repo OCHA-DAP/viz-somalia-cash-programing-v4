@@ -222,6 +222,7 @@ function filterWhatChart (item) {
 }
 
 var ipcRangePeriod = 'jul_sep';
+var ipcRangePeriodGlobal = "";
 
 var cashIPCDim, 
     cashIPCGroup;
@@ -239,29 +240,24 @@ function mergeIPCPinData() {
     ['April', 'May', 'June'].includes(month) ? ipcRangePeriod = 'apr_jun' :
     ['July', 'August', 'September'].includes(month) ? ipcRangePeriod = 'jul_sep' :
     ['October', 'November', 'December'].includes(month) ? ipcRangePeriod = 'oct_dec' : ''; 
-
-
-    if (year == "2020") {
-        //en attendant d'avoir les donnees
-        ipcRangePeriod == 'oct_dec' ? ipcRangePeriod = 'jul_sep' : null;
+    
         
-        label = ipcRangePeriod+'_'+"2020";
+    ipcRangePeriod == 'jan_mar' ? ipcValidy = 'January-March ' : 
+    ipcRangePeriod == 'apr_jun' ? ipcValidy = 'April-June ' : 
+    ipcRangePeriod == 'jul_sep' ? ipcValidy = 'July-September ' : 
+    ipcRangePeriod == 'oct_dec' ? ipcValidy = 'October-December ' : null;
 
-    } else if (year == "2021") {
-        ipcRangePeriod = 'jul_sep' ;
-        label = ipcRangePeriod+'_'+"2020";
-    } else {
+    if (["2018", "2019"].includes(year)) {
         ipcRangePeriod = 'jan_mar' ;
         label = ipcRangePeriod+'_'+"2020";
+        ipcRangePeriodGlobal = ipcRangePeriod+'_'+"2020";
+        ipcValidy = "January-March 2020";
+    } else {
+        label = ipcRangePeriod+'_' + year;
+        ipcRangePeriodGlobal = ipcRangePeriod+'_'+year;
+        ipcValidy += year;
     }
 
-
-        
-    ipcRangePeriod == 'jan_mar' ? ipcValidy = 'January-March 2020' : 
-    ipcRangePeriod == 'apr_jun' ? ipcValidy = 'April-June 2020' : 
-    ipcRangePeriod == 'jul_sep' ? ipcValidy = 'July-September 2020' : 
-    ipcRangePeriod == 'oct_dec' ? ipcValidy = 'July-September 2020' : null;
-    
     ipcData.forEach( function(element, index) {
         var pct_all = null,
             pct_stressed = null,
@@ -431,8 +427,8 @@ function initIPCMap(){
         $("input[name='emergency']").is(":checked") ? label +='emergency': ''
 
         var pct = filtered[0]['#percentage+'+label];
-        var pin = filtered[0][label+'_'+ipcRangePeriod+'_2020']
-        var txt = '<h5>'+d.properties.DIST_NAME+'</h5>'+
+        var pin = filtered[0][label+'_'+ipcRangePeriodGlobal]
+        var txt = '<h5>'+d.properties.DIST_NAME+' ('+d.properties.REG_NAME+')</h5>'+
             '<h6>% of People reached: '+pct+'</h6>'+
             '<h6> People in Need: '+pin+'</h6>';
 

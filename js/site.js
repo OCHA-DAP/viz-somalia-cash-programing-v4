@@ -236,7 +236,7 @@ function mergeIPCPinData() {
     var month = $('.monthSelectionList').val();
     var year = $('.yearSelectionList').val();
 
-    ['January', 'March'].includes(month) ? ipcRangePeriod = 'jan_mar' : 
+    ['January', 'February', 'March'].includes(month) ? ipcRangePeriod = 'jan_mar' : 
     ['April', 'May', 'June'].includes(month) ? ipcRangePeriod = 'apr_jun' :
     ['July', 'August', 'September'].includes(month) ? ipcRangePeriod = 'jul_sep' :
     ['October', 'November', 'December'].includes(month) ? ipcRangePeriod = 'oct_dec' : ''; 

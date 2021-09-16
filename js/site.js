@@ -227,6 +227,39 @@ var ipcRangePeriodGlobal = "";
 var cashIPCDim, 
     cashIPCGroup;
 
+function getIPCRangePeriod(month) {
+    var IPCperiod;
+
+    ['January', 'February', 'March'].includes(month) ? IPCperiod = 'jan_mar' : 
+    ['April', 'May', 'June'].includes(month) ? IPCperiod = 'apr_jun' :
+    ['July', 'August', 'September'].includes(month) ? IPCperiod = 'jul_sep' :
+    ['October', 'November', 'December'].includes(month) ? IPCperiod = 'oct_dec' : '';
+    
+    return IPCperiod;
+}//getIPCRangePeriod
+
+function getPreviousIPCRangePeriod(month) {
+    // var monthNum = {
+    //     1: "January", 2: "February", 3: "March", 4: "April", 5: "May", 6: "June", 
+    //     7:"July", 8: "August", 9: "September", 10:"October", 11: "November", 12: "December"
+    // }
+    
+
+    // var prevNum = Number(datesDic[month])-1;
+    // prevNum == 0 ? prevNum = 12 : null ;
+
+    // var previousMonth = monthNum[prevNum];
+
+
+    var previousRange = 'oct_dec';
+
+    ['October', 'November', 'December'].includes(month) ? previousRange = 'jul_sep' :
+    ['July', 'August', 'September'].includes(month) ? previousRange = 'apr_jun' :
+    ['April', 'May', 'June'].includes(month) ? previousRange = 'jan_mar' : null;
+
+    return previousRange;
+    
+} //getPreviousIPCRangePeriod
 
 function mergeIPCPinData() {
     var yr = '2020'; 
@@ -236,11 +269,7 @@ function mergeIPCPinData() {
     var month = $('.monthSelectionList').val();
     var year = $('.yearSelectionList').val();
 
-    ['January', 'February', 'March'].includes(month) ? ipcRangePeriod = 'jan_mar' : 
-    ['April', 'May', 'June'].includes(month) ? ipcRangePeriod = 'apr_jun' :
-    ['July', 'August', 'September'].includes(month) ? ipcRangePeriod = 'jul_sep' :
-    ['October', 'November', 'December'].includes(month) ? ipcRangePeriod = 'oct_dec' : ''; 
-    
+    ipcRangePeriod = getIPCRangePeriod(month);
         
     ipcRangePeriod == 'jan_mar' ? ipcValidy = 'January-March ' : 
     ipcRangePeriod == 'apr_jun' ? ipcValidy = 'April-June ' : 
@@ -256,7 +285,28 @@ function mergeIPCPinData() {
         label = ipcRangePeriod+'_' + year;
         ipcRangePeriodGlobal = ipcRangePeriod+'_'+year;
         ipcValidy += year;
+
+        // var ipcDataRow0 = ipcData[0];
+
+        // if(ipcDataRow0['all_'+ipcRangePeriodGlobal] == undefined) {
+        //     var gotAGoodRange = false;
+        //     var previousRange = getPreviousIPCRangePeriod(month);
+        //     console.log("previous range ipc: " +previousRange);
+        //     // while(!gotAGoodRange){
+
+        //     //     newRange = getIPCRangePeriod()
+        //     //     gotAGoodRange = true;
+        //     // }
+        // }
+
+        // console.log(ipcRangePeriodGlobal)
+        // var previousRange = getPreviousIPCRangePeriod(month);
+        // console.log("previous range ipc: " +previousRange);
+        // console.log(ipcDataRow0['all_'+ipcRangePeriodGlobal])
+
     }
+
+    // console.log(ipcData)
 
     ipcData.forEach( function(element, index) {
         var pct_all = null,
@@ -1058,15 +1108,32 @@ var ipcDataCall = $.ajax({
     dataType: 'json',
 });
 
+var yearsDropdownDataCall = $.ajax({
+    type: 'GET',
+    url: 'https://proxy.hxlstandard.org/data.objects.json?strip-headers=on&url=https%3A%2F%2Fdocs.google.com%2Fspreadsheets%2Fd%2F1PZuC-Kf206kUcizDhz9qtWPR7hvc9hlfDJwirNbaPbk%2Fedit%23gid%3D340989934&force=on',
+    dataType: 'json',
+});
 
-$.when(ipcDataCall, geomCall).then(function (ipc, geomArgs) {
+$.when(ipcDataCall, geomCall, yearsDropdownDataCall).then(function (ipc, geomArgs, years) {
     $('.title').html(title);
+    
+    var yOpt = '';
+    for (var i = 0; i < years[0].length; i++) {
+        var an = years[0][i]['#date+year'];
+        var curr = years[0][i]['#meta+current'];
+        curr == "YES" ? yOpt +='<option value="' + an +'" selected>' + an + '</option>' : yOpt +='<option value="' + an +'">' + an + '</option>';
+        
+    }
+
+    $('.yearSelectionList').append(yOpt);
+
     var month = $('.monthSelectionList').val();
     var year = $('.yearSelectionList').val();
     var id = String(year)+datesDic[month];
 
     ipcData = ipc[0];//hxlProxyToJSON(ipc[0]);
     geom = geomArgs[0];
+
 
     generateOverviewText(id)
     generateLineCharts(monthlyMonths,monthlyBeneficiaries, monthlyTransfer, '#yearlyChart');

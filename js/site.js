@@ -91,14 +91,21 @@ var mapsvg,
 
 var fillCircle = '#418FDE';
 var fillcolor = '#dddddd';
-var ipcStressed = '#e5e692';
-var ipcStressedRange = ['#faf9e1', '#f8f7d5', '#f6f5c8', '#f4f2bb', '#f1f0ae', '#efeea2', '#edeb95','#ebe988'];
 
-var ipcCrisis = '#e5921d';
-var ipcCrisisRange = ['#fae1bf','#f8d5a4','#f6c889','#f4bb6d','#f2ae52','#f0a237','#ee951b','#ec8800'];
-var ipcEmergency = '#cc3f39';
-var ipcEmergencyRange = ['#f4c8c5','#efb1ac','#eb9a93','#e6827a','#e16a16','#dc5348','#d83b2f','#d32416'];
+//var ipcStressed = '#e5e692';
+//var ipcStressedRange = ['#faf9e1', '#f8f7d5', '#f6f5c8', '#f4f2bb', '#f1f0ae', '#efeea2', '#edeb95','#ebe988'];
 
+                        
+var ipcCrisis = '#E67801';
+var ipcCrisisRange = ['#F2BB80', '#F0B16D', '#EEA75B', '#EC9E49', '#EB9437', '#E98B25', '#E78113', '#E67801'];
+
+var ipcEmergency = '#C80101';
+var ipcEmergencyRange = ['#E3807F', '#DF6D6D', '#DB5B5B', '#D74949', '#D33737', '#CF2525', '#CB1313', '#C80101']
+
+var ipcCatastrophe = '#590000';
+var ipcCatastropheRange = ['#AC7F7F', '#A06C6C', '#945A5A', '#884848', '#7C3636', '#702424', '#641212', '#590000']
+
+var notAvailable = '#aeb0b0'
 
 var initSettings = (function(){
     $.ajax({
@@ -310,35 +317,41 @@ function mergeIPCPinData() {
 
     ipcData.forEach( function(element, index) {
         var pct_all = null,
-            pct_stressed = null,
+            #pct_stressed = null,
             pct_crisis = null,
             pct_emergency = null;
+			pct_catastrophe = null;
 
         for (var i = 0; i < cashIPCGroup.length; i++) {
             if(cashIPCGroup[i].key == element.code){
                 var reached = Number(cashIPCGroup[i].value);
-                var ipcStress = Number(element['stressed_'+label]);
+                #var ipcStress = Number(element['stressed_'+label]);
                 var ipcCris = Number(element['crisis_'+label]);
                 var ipcEmer = Number(element['emergency_'+label]);
+				var ipcCatast = Number(element['catastrophe_'+label]);
                 
                 element['#beneficiaries'] = reached;
 
-                (ipcStress == 0) ? ipcStress = reached : '';
+                #(ipcStress == 0) ? ipcStress = reached : '';
                 ipcCris == 0 ? ipcCris = reached : '';
                 ipcEmer == 0 ? ipcEmer = reached : '';
-                pct_stressed = Number(((reached*100)/ipcStress).toFixed(2));
+				ipcCatast == 0 ? ipcEmer = reached : '';
+                #pct_stressed = Number(((reached*100)/ipcStress).toFixed(2));
                 pct_crisis = Number(((reached*100)/ipcCris).toFixed(2));
                 pct_emergency = Number(((reached*100)/ipcEmer).toFixed(2));
+				pct_catastrophe = Number(((reached*100)/ipcCatast).toFixed(2));
                 
-                pct_stressed > 100 ? pct_stressed = 100 : '';
+                #pct_stressed > 100 ? pct_stressed = 100 : '';
                 pct_crisis > 100 ? pct_crisis = 100 : '';
                 pct_emergency > 100 ? pct_emergency = 100 : '';
+				pct_catastrophe > 100 ? pct_catastrophe = 100 : '';
             }
          }
 
-        element['#percentage+stressed'] = pct_stressed;
+        #element['#percentage+stressed'] = pct_stressed;
         element['#percentage+crisis'] = pct_crisis;
         element['#percentage+emergency'] = pct_emergency;
+		element['#percentage+catastrophe'] = pct_catastrophe;
           
     });
 
@@ -349,9 +362,11 @@ function mergeIPCPinData() {
 
 function getMax(phase) {
     var label;
-    phase == undefined ? label = '#percentage+stressed' :
-    phase == 'stressed' ? label = '#percentage+stressed' :
-    phase == 'crisis' ? label = '#percentage+crisis' : label = '#percentage+emergency';
+    phase == undefined ? label = '#percentage+N/A' :
+    #phase == 'stressed' ? label = '#percentage+stressed' :
+    phase == 'crisis' ? label = '#percentage+crisis' : 
+	phase == 'emergency' ? label = '#percentage+emergency':
+	label = '#percentage+catastrophe';
 
     var max = d3.max(ipcData, function(d){
         return d[label];
@@ -365,21 +380,25 @@ function choroplethIPCMap(phase) {
     var range ;
 
     if (phase == undefined) {
-        pctLabel = '#percentage+stressed';
-        range = ipcStressedRange ;
-        $("input[name='stressed']").prop('checked', true);
+        pctLabel = '#percentage+N/A';
+        range = notAvailable;
+        $("input[name='N/A']").prop('checked', true);
         $("input[name='crisis']").prop('checked', false);
         $("input[name='emergency']").prop('checked', false);
-    } else if (phase == 'stressed' ) {
-        pctLabel = '#percentage+stressed';
-        range = ipcStressedRange ;
+		$("input[name='catastrophe']").prop('checked', false);
+    // } else if (phase == 'stressed' ) {
+        // pctLabel = '#percentage+stressed';
+        // range = ipcStressedRange ;
     } else if (phase == 'crisis') {
         pctLabel = '#percentage+crisis';
         range = ipcCrisisRange;
-    } else {
+    } else if (phase == 'emergency'){
         pctLabel = '#percentage+emergency';
         range = ipcEmergencyRange;
-    }
+    }else{
+		pctLabel = '#percentage+catastrophe';
+        range = ipcCatastropheRange;
+	}
 
     var ipcColorScale = d3.scale.quantize()
             .domain([0, 100])
@@ -457,9 +476,9 @@ function initIPCMap(){
                       .style('bottom', 10)
                       .style('right', 10);
 
-    var inputs = '<input type="checkbox" checked name="stressed"> IPC 3+<br>'+
-                 '<input type="checkbox" name="crisis"> IPC 4+<br>'+
-                 '<input type="checkbox" name="emergency"> IPC 5';
+    var inputs = '<input type="checkbox" checked name="crisis"> IPC 3+<br>'+
+                 '<input type="checkbox" name="emergency"> IPC 4+<br>'+
+                 '<input type="checkbox" name="catastrophe"> IPC 5';
     ipcLegend.html(inputs);
 
     var text = '<h6>% of People in need: 100%</h6>'+
@@ -472,9 +491,10 @@ function initIPCMap(){
 
         var label = '';
         // $("input[name='all']").is(":checked") ? label +='all':
-        $("input[name='stressed']").is(":checked") ? label = 'stressed' :
+        #$("input[name='stressed']").is(":checked") ? label = 'stressed' :
         $("input[name='crisis']").is(":checked") ? label +='crisis':
-        $("input[name='emergency']").is(":checked") ? label +='emergency': ''
+        $("input[name='emergency']").is(":checked") ? label +='emergency': 
+		$("input[name='catastrophe']").is(":checked") ? label +='catastrophe': ''
 
         var pct = filtered[0]['#percentage+'+label];
         var pin = filtered[0][label+'_'+ipcRangePeriodGlobal]
@@ -499,31 +519,41 @@ function initIPCMap(){
     //     }
     // });
 
-    $("input[name='stressed']").change(function() {
+    /* $("input[name='stressed']").change(function() {
         if(this.checked) {
             $("input[name='crisis']").prop('checked', false);
             $("input[name='emergency']").prop('checked', false);
+			$("input[name='catastrophe']").prop('checked', false);
             choroplethIPCMap('stressed');
         }
-    });
+    }); */
 
     $("input[name='crisis']").change(function() {
         if(this.checked) {
-            $("input[name='stressed']").prop('checked', false);
+         #  $("input[name='stressed']").prop('checked', false);
             $("input[name='emergency']").prop('checked', false);
+			$("input[name='catastrophe']").prop('checked', false);
             choroplethIPCMap('crisis');
         }
     });
 
     $("input[name='emergency']").change(function() {
         if(this.checked) {
-            $("input[name='stressed']").prop('checked', false);
+           # $("input[name='stressed']").prop('checked', false);
             $("input[name='crisis']").prop('checked', false);
+			$("input[name='catastrophe']").prop('checked', false);
             choroplethIPCMap('emergency');
         }
     });
 
-
+	$("input[name='catastrophe']").change(function() {
+        if(this.checked) {
+           # $("input[name='stressed']").prop('checked', false);
+            $("input[name='crisis']").prop('checked', false);
+			$("input[name='emergency']").prop('checked', false);
+            choroplethIPCMap('catastrophe');
+        }
+    });
 
 
 } //initIPCMap

@@ -91,21 +91,13 @@ var mapsvg,
 
 var fillCircle = '#418FDE';
 var fillcolor = '#dddddd';
-
 //var ipcStressed = '#e5e692';
-//var ipcStressedRange = ['#faf9e1', '#f8f7d5', '#f6f5c8', '#f4f2bb', '#f1f0ae', '#efeea2', '#edeb95','#ebe988'];
+var ipcStressedRange = ['#F9DDBF', '#F6CEA3', '#F3C088', '#F0B16D', '#EEA352', '#EB9437', '#E8861C', '#E67801'];//['#faf9e1', '#f8f7d5', '#f6f5c8', '#f4f2bb', '#f1f0ae', '#efeea2', '#edeb95','#ebe988'];
+//var ipcCrisis = '#e5921d';
+var ipcCrisisRange = ['#F1BFBF','#EBA3A3','#E58888','#DF6D6D','#D95252','#D33737','#CD1C1C','#C80101'];
+//var ipcEmergency = '#cc3f39';
+var ipcEmergencyRange = ['#D5BFBF','#C3A3A3','#B18888','#9F6D6D','#8E5151','#7C3636','#6A1B1B','#590000'];
 
-                        
-var ipcCrisis = '#E67801';
-var ipcCrisisRange = ['#F2BB80', '#F0B16D', '#EEA75B', '#EC9E49', '#EB9437', '#E98B25', '#E78113', '#E67801'];
-
-var ipcEmergency = '#C80101';
-var ipcEmergencyRange = ['#E3807F', '#DF6D6D', '#DB5B5B', '#D74949', '#D33737', '#CF2525', '#CB1313', '#C80101']
-
-var ipcCatastrophe = '#590000';
-var ipcCatastropheRange = ['#AC7F7F', '#A06C6C', '#945A5A', '#884848', '#7C3636', '#702424', '#641212', '#590000']
-
-var notAvailable = '#aeb0b0'
 
 var initSettings = (function(){
     $.ajax({
@@ -317,41 +309,35 @@ function mergeIPCPinData() {
 
     ipcData.forEach( function(element, index) {
         var pct_all = null,
-            #pct_stressed = null,
+            pct_stressed = null,
             pct_crisis = null,
             pct_emergency = null;
-			pct_catastrophe = null;
 
         for (var i = 0; i < cashIPCGroup.length; i++) {
             if(cashIPCGroup[i].key == element.code){
                 var reached = Number(cashIPCGroup[i].value);
-                #var ipcStress = Number(element['stressed_'+label]);
+                var ipcStress = Number(element['stressed_'+label]);
                 var ipcCris = Number(element['crisis_'+label]);
                 var ipcEmer = Number(element['emergency_'+label]);
-				var ipcCatast = Number(element['catastrophe_'+label]);
                 
                 element['#beneficiaries'] = reached;
 
-                #(ipcStress == 0) ? ipcStress = reached : '';
+                (ipcStress == 0) ? ipcStress = reached : '';
                 ipcCris == 0 ? ipcCris = reached : '';
                 ipcEmer == 0 ? ipcEmer = reached : '';
-				ipcCatast == 0 ? ipcEmer = reached : '';
-                #pct_stressed = Number(((reached*100)/ipcStress).toFixed(2));
+                pct_stressed = Number(((reached*100)/ipcStress).toFixed(2));
                 pct_crisis = Number(((reached*100)/ipcCris).toFixed(2));
                 pct_emergency = Number(((reached*100)/ipcEmer).toFixed(2));
-				pct_catastrophe = Number(((reached*100)/ipcCatast).toFixed(2));
                 
-                #pct_stressed > 100 ? pct_stressed = 100 : '';
+                pct_stressed > 100 ? pct_stressed = 100 : '';
                 pct_crisis > 100 ? pct_crisis = 100 : '';
                 pct_emergency > 100 ? pct_emergency = 100 : '';
-				pct_catastrophe > 100 ? pct_catastrophe = 100 : '';
             }
          }
 
-        #element['#percentage+stressed'] = pct_stressed;
+        element['#percentage+stressed'] = pct_stressed;
         element['#percentage+crisis'] = pct_crisis;
         element['#percentage+emergency'] = pct_emergency;
-		element['#percentage+catastrophe'] = pct_catastrophe;
           
     });
 
@@ -362,11 +348,9 @@ function mergeIPCPinData() {
 
 function getMax(phase) {
     var label;
-    phase == undefined ? label = '#percentage+N/A' :
-    #phase == 'stressed' ? label = '#percentage+stressed' :
-    phase == 'crisis' ? label = '#percentage+crisis' : 
-	phase == 'emergency' ? label = '#percentage+emergency':
-	label = '#percentage+catastrophe';
+    phase == undefined ? label = '#percentage+stressed' :
+    phase == 'stressed' ? label = '#percentage+stressed' :
+    phase == 'crisis' ? label = '#percentage+crisis' : label = '#percentage+emergency';
 
     var max = d3.max(ipcData, function(d){
         return d[label];
@@ -380,25 +364,21 @@ function choroplethIPCMap(phase) {
     var range ;
 
     if (phase == undefined) {
-        pctLabel = '#percentage+N/A';
-        range = notAvailable;
-        $("input[name='N/A']").prop('checked', true);
+        pctLabel = '#percentage+stressed';
+        range = ipcStressedRange ;
+        $("input[name='stressed']").prop('checked', true);
         $("input[name='crisis']").prop('checked', false);
         $("input[name='emergency']").prop('checked', false);
-		$("input[name='catastrophe']").prop('checked', false);
-    // } else if (phase == 'stressed' ) {
-        // pctLabel = '#percentage+stressed';
-        // range = ipcStressedRange ;
+    } else if (phase == 'stressed' ) {
+        pctLabel = '#percentage+stressed';
+        range = ipcStressedRange ;
     } else if (phase == 'crisis') {
         pctLabel = '#percentage+crisis';
         range = ipcCrisisRange;
-    } else if (phase == 'emergency'){
+    } else {
         pctLabel = '#percentage+emergency';
         range = ipcEmergencyRange;
-    }else{
-		pctLabel = '#percentage+catastrophe';
-        range = ipcCatastropheRange;
-	}
+    }
 
     var ipcColorScale = d3.scale.quantize()
             .domain([0, 100])
@@ -476,9 +456,9 @@ function initIPCMap(){
                       .style('bottom', 10)
                       .style('right', 10);
 
-    var inputs = '<input type="checkbox" checked name="crisis"> IPC 3+<br>'+
-                 '<input type="checkbox" name="emergency"> IPC 4+<br>'+
-                 '<input type="checkbox" name="catastrophe"> IPC 5';
+    var inputs = '<input type="checkbox" checked name="stressed"> IPC 3+<br>'+
+                 '<input type="checkbox" name="crisis"> IPC 4+<br>'+
+                 '<input type="checkbox" name="emergency"> IPC 5';
     ipcLegend.html(inputs);
 
     var text = '<h6>% of People in need: 100%</h6>'+
@@ -491,16 +471,15 @@ function initIPCMap(){
 
         var label = '';
         // $("input[name='all']").is(":checked") ? label +='all':
-        #$("input[name='stressed']").is(":checked") ? label = 'stressed' :
+        $("input[name='stressed']").is(":checked") ? label = 'stressed' :
         $("input[name='crisis']").is(":checked") ? label +='crisis':
-        $("input[name='emergency']").is(":checked") ? label +='emergency': 
-		$("input[name='catastrophe']").is(":checked") ? label +='catastrophe': ''
+        $("input[name='emergency']").is(":checked") ? label +='emergency': ''
 
         var pct = filtered[0]['#percentage+'+label];
-        var pin = filtered[0][label+'_'+ipcRangePeriodGlobal]
-        var txt = '<h5>'+d.properties.DIST_NAME+' ('+d.properties.REG_NAME+')</h5>'+
-            '<h6>% of People reached: '+pct+'</h6>'+
-            '<h6> People in Need: '+pin+'</h6>';
+        var pin = filtered[0][label+'_'+ipcRangePeriodGlobal];
+        var txt = `<h5>${d.properties.DIST_NAME} (${d.properties.REG_NAME})</h5>`;
+            txt += `<h6>% of People reached: ${pct==null ? 'NA' : pct+'%'}</h6>`;
+            txt += `<h6>People in Need: ${d3.format(',')(pin)}</h6>`;
 
         showMapTooltip(d, maptip, txt);
       })
@@ -519,41 +498,31 @@ function initIPCMap(){
     //     }
     // });
 
-    /* $("input[name='stressed']").change(function() {
+    $("input[name='stressed']").change(function() {
         if(this.checked) {
             $("input[name='crisis']").prop('checked', false);
             $("input[name='emergency']").prop('checked', false);
-			$("input[name='catastrophe']").prop('checked', false);
             choroplethIPCMap('stressed');
         }
-    }); */
+    });
 
     $("input[name='crisis']").change(function() {
         if(this.checked) {
-         #  $("input[name='stressed']").prop('checked', false);
+            $("input[name='stressed']").prop('checked', false);
             $("input[name='emergency']").prop('checked', false);
-			$("input[name='catastrophe']").prop('checked', false);
             choroplethIPCMap('crisis');
         }
     });
 
     $("input[name='emergency']").change(function() {
         if(this.checked) {
-           # $("input[name='stressed']").prop('checked', false);
+            $("input[name='stressed']").prop('checked', false);
             $("input[name='crisis']").prop('checked', false);
-			$("input[name='catastrophe']").prop('checked', false);
             choroplethIPCMap('emergency');
         }
     });
 
-	$("input[name='catastrophe']").change(function() {
-        if(this.checked) {
-           # $("input[name='stressed']").prop('checked', false);
-            $("input[name='crisis']").prop('checked', false);
-			$("input[name='emergency']").prop('checked', false);
-            choroplethIPCMap('catastrophe');
-        }
-    });
+
 
 
 } //initIPCMap
@@ -573,9 +542,9 @@ var formatDecimalAVG = function (d) {
     ret = d3.format(".1f");
     return "$ " + ret(d);
 };
-var formatMoney = function (d) {
-    return "$ " + formatDecimalComma(d);
-};
+// var formatMoney = function (d) {
+//     return "$ " + formatDecimalComma(d);
+// };
 
 function checkIntData(d){
     return (isNaN(parseInt(d)) || parseInt(d)<0) ? 0 : parseInt(d);
@@ -742,11 +711,11 @@ function generate3WComponent() {
 
     amountTransfered.group(gp)
         .valueAccessor(amount)
-        .formatNumber(formatMoney);
+        .formatNumber(d3.format('$.2s'));
 
     peopleAssisted.group(gp)
         .valueAccessor(peopleA)
-        .formatNumber(formatDecimalComma);
+        .formatNumber(d3.format('.2s'));
 
     //tooltip
     var rowtip = d3.tip().attr('class', 'd3-tip').html(function (d) {
@@ -829,7 +798,6 @@ function generate3WComponent() {
         .height(190)
         .radius(80)
         .innerRadius(40)
-
         .dimension(dimRuralUrban)
         .group(groupRuralUrban)
         .colors(config.colorScale3)
@@ -859,7 +827,8 @@ function generate3WComponent() {
         .colorAccessor(function (d, i) {
             return 0;
         })
-        .xAxis().ticks(5);
+        .title(d => '')
+        .xAxis().ticks(5).tickFormat(d3.format('.2s'));
     
     whoChart.on('filtered', function(chart, filter){
         if (chart.hasFilter()) {
@@ -883,7 +852,8 @@ function generate3WComponent() {
         .colorAccessor(function (d) {
             return 0;
         })
-        .xAxis().ticks(5);
+        .title(d => '')
+        .xAxis().ticks(5).tickFormat(d3.format('.2s'));
         
 
     whatChart.on('filtered', function(chart, filter){
@@ -909,7 +879,8 @@ function generate3WComponent() {
         .colorAccessor(function (d) {
             return 0;
         })
-        .xAxis().ticks(5);
+        .title(d => '')
+        .xAxis().ticks(5).tickFormat(d3.format('.2s'));
 
     dc.dataCount('#count-info')
         .dimension(cashData)
@@ -987,14 +958,14 @@ function generateLineCharts(x, data1, data2, bindTo){
    c3.generate({
         bindto: bindTo,
         size: {
-            height: 180
+            height: 200
         },
         data: {
             x: 'x',
             columns: [
-            x,
-            data1,
-            data2
+                x,
+                data1,
+                data2
             ]
         },
         axis: {
@@ -1003,14 +974,22 @@ function generateLineCharts(x, data1, data2, bindTo){
                 //localtime: false,
                 tick: {
                     //count:6,
-                    format: '%b %Y'
+                    format: '%b %Y',
+                    outer: false
                 }
             },
             y: {
+                min: 0,
                 tick: {
-                    count:6,
-                    format: d3.format('.2s')
+                    count: 6,
+                    format: d3.format('.2s'),
+                    outer: false
                 }
+            }
+        },
+        grid: {
+            y: {
+                show: true
             }
         },
         tooltip: {
@@ -1038,12 +1017,11 @@ var datesDic = {
         'December':'12'
 };
 
-function generateKeyFigures (mm, yy) {
-    var id = String(yy)+datesDic[mm];
-    $("#peopleAssisted").text(formatComma(parseFloat(settings[id].beneficiaries)));
-    $("#amountTransfered").text(formatMoney(parseFloat(settings[id].value)));
-    
-} //fin generateKeyFigures
+// function generateKeyFigures (mm, yy) {
+//     var id = String(yy)+datesDic[mm];
+//     $("#peopleAssisted").text(formatComma(parseFloat(settings[id].beneficiaries)));
+//     $("#amountTransfered").text(formatMoney(parseFloat(settings[id].value)));
+// } //fin generateKeyFigures
 
 
 

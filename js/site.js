@@ -91,13 +91,12 @@ var mapsvg,
 
 var fillCircle = '#418FDE';
 var fillcolor = '#dddddd';
-var ipcStressed = '#e5e692';
-var ipcStressedRange = ['#faf9e1', '#f8f7d5', '#f6f5c8', '#f4f2bb', '#f1f0ae', '#efeea2', '#edeb95','#ebe988'];
-
-var ipcCrisis = '#e5921d';
-var ipcCrisisRange = ['#fae1bf','#f8d5a4','#f6c889','#f4bb6d','#f2ae52','#f0a237','#ee951b','#ec8800'];
-var ipcEmergency = '#cc3f39';
-var ipcEmergencyRange = ['#f4c8c5','#efb1ac','#eb9a93','#e6827a','#e16a16','#dc5348','#d83b2f','#d32416'];
+//var ipcStressed = '#e5e692';
+var ipcStressedRange = ['#F9DDBF', '#F6CEA3', '#F3C088', '#F0B16D', '#EEA352', '#EB9437', '#E8861C', '#E67801'];//['#faf9e1', '#f8f7d5', '#f6f5c8', '#f4f2bb', '#f1f0ae', '#efeea2', '#edeb95','#ebe988'];
+//var ipcCrisis = '#e5921d';
+var ipcCrisisRange = ['#F1BFBF','#EBA3A3','#E58888','#DF6D6D','#D95252','#D33737','#CD1C1C','#C80101'];
+//var ipcEmergency = '#cc3f39';
+var ipcEmergencyRange = ['#D5BFBF','#C3A3A3','#B18888','#9F6D6D','#8E5151','#7C3636','#6A1B1B','#590000'];
 
 
 var initSettings = (function(){
@@ -477,10 +476,10 @@ function initIPCMap(){
         $("input[name='emergency']").is(":checked") ? label +='emergency': ''
 
         var pct = filtered[0]['#percentage+'+label];
-        var pin = filtered[0][label+'_'+ipcRangePeriodGlobal]
-        var txt = '<h5>'+d.properties.DIST_NAME+' ('+d.properties.REG_NAME+')</h5>'+
-            '<h6>% of People reached: '+pct+'</h6>'+
-            '<h6> People in Need: '+pin+'</h6>';
+        var pin = filtered[0][label+'_'+ipcRangePeriodGlobal];
+        var txt = `<h5>${d.properties.DIST_NAME} (${d.properties.REG_NAME})</h5>`;
+            txt += `<h6>% of People reached: ${pct==null ? 'NA' : pct+'%'}</h6>`;
+            txt += `<h6>People in Need: ${d3.format(',')(pin)}</h6>`;
 
         showMapTooltip(d, maptip, txt);
       })
@@ -543,9 +542,9 @@ var formatDecimalAVG = function (d) {
     ret = d3.format(".1f");
     return "$ " + ret(d);
 };
-var formatMoney = function (d) {
-    return "$ " + formatDecimalComma(d);
-};
+// var formatMoney = function (d) {
+//     return "$ " + formatDecimalComma(d);
+// };
 
 function checkIntData(d){
     return (isNaN(parseInt(d)) || parseInt(d)<0) ? 0 : parseInt(d);
@@ -712,11 +711,11 @@ function generate3WComponent() {
 
     amountTransfered.group(gp)
         .valueAccessor(amount)
-        .formatNumber(formatMoney);
+        .formatNumber(d3.format('$.2s'));
 
     peopleAssisted.group(gp)
         .valueAccessor(peopleA)
-        .formatNumber(formatDecimalComma);
+        .formatNumber(d3.format('.2s'));
 
     //tooltip
     var rowtip = d3.tip().attr('class', 'd3-tip').html(function (d) {
@@ -799,7 +798,6 @@ function generate3WComponent() {
         .height(190)
         .radius(80)
         .innerRadius(40)
-
         .dimension(dimRuralUrban)
         .group(groupRuralUrban)
         .colors(config.colorScale3)
@@ -829,7 +827,8 @@ function generate3WComponent() {
         .colorAccessor(function (d, i) {
             return 0;
         })
-        .xAxis().ticks(5);
+        .title(d => '')
+        .xAxis().ticks(5).tickFormat(d3.format('.2s'));
     
     whoChart.on('filtered', function(chart, filter){
         if (chart.hasFilter()) {
@@ -853,7 +852,8 @@ function generate3WComponent() {
         .colorAccessor(function (d) {
             return 0;
         })
-        .xAxis().ticks(5);
+        .title(d => '')
+        .xAxis().ticks(5).tickFormat(d3.format('.2s'));
         
 
     whatChart.on('filtered', function(chart, filter){
@@ -879,7 +879,8 @@ function generate3WComponent() {
         .colorAccessor(function (d) {
             return 0;
         })
-        .xAxis().ticks(5);
+        .title(d => '')
+        .xAxis().ticks(5).tickFormat(d3.format('.2s'));
 
     dc.dataCount('#count-info')
         .dimension(cashData)
@@ -957,14 +958,14 @@ function generateLineCharts(x, data1, data2, bindTo){
    c3.generate({
         bindto: bindTo,
         size: {
-            height: 180
+            height: 200
         },
         data: {
             x: 'x',
             columns: [
-            x,
-            data1,
-            data2
+                x,
+                data1,
+                data2
             ]
         },
         axis: {
@@ -973,14 +974,22 @@ function generateLineCharts(x, data1, data2, bindTo){
                 //localtime: false,
                 tick: {
                     //count:6,
-                    format: '%b %Y'
+                    format: '%b %Y',
+                    outer: false
                 }
             },
             y: {
+                min: 0,
                 tick: {
-                    count:6,
-                    format: d3.format('.2s')
+                    count: 6,
+                    format: d3.format('.2s'),
+                    outer: false
                 }
+            }
+        },
+        grid: {
+            y: {
+                show: true
             }
         },
         tooltip: {
@@ -1008,12 +1017,11 @@ var datesDic = {
         'December':'12'
 };
 
-function generateKeyFigures (mm, yy) {
-    var id = String(yy)+datesDic[mm];
-    $("#peopleAssisted").text(formatComma(parseFloat(settings[id].beneficiaries)));
-    $("#amountTransfered").text(formatMoney(parseFloat(settings[id].value)));
-    
-} //fin generateKeyFigures
+// function generateKeyFigures (mm, yy) {
+//     var id = String(yy)+datesDic[mm];
+//     $("#peopleAssisted").text(formatComma(parseFloat(settings[id].beneficiaries)));
+//     $("#amountTransfered").text(formatMoney(parseFloat(settings[id].value)));
+// } //fin generateKeyFigures
 
 
 

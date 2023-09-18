@@ -6,12 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel='icon' type='image/png' href='https://data.humdata.org/images/icons/hdx.ico' />
     <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/fonts.css" />
     <link rel="stylesheet" type="text/css" href="css/dc.css" />
-    <link rel="stylesheet" type="text/css" href="css/site.css" />
     <link rel="stylesheet" type="text/css" href="css/leaflet.css" />
+    <link rel="stylesheet" type="text/css" href="css/site.css" />
     <link rel="stylesheet" type="text/css" href="css/c3.css" />
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700" rel="stylesheet">
     <script src="js/jquery.js"></script>
     <script src="js/d3.min.js"></script>
@@ -27,6 +27,10 @@
 
 </head>
 <body>
+    <div class='alert-message'>
+      <p>We are no longer maintaining this dashboard as of <b>2022-12-30</b>. The underlying datasets will continue to be hosted on <a href='https://data.humdata.org/dataset/cash-based-programming-in-somalia-2018' target='_blank'>HDX</a>. Contact us at <a href='mailto:hdx@un.org'>hdx@un.org</a> with questions or feedback.</p>
+    </div>
+
     <div class="loader">
       <div class="sp sp-circle"></div>
       Loading data...
@@ -39,29 +43,31 @@
             <div class="col-md-9 col-sm-12 col-xs-12" id="overview">
                 <span class="justify"></span>
             </div>
-            <div class="col-md-1 col-sm-4 col-xs-4">
-                <h4>Month</h4>
-                <select class="monthSelectionList">
-                     <option value="January">January</option>
-                    <option value="February">February</option>
-                    <option value="March">March</option>
-                    <option value="April">April</option>
-                    <option value="May">May</option>
-                     <option value="June">June</option>
-                    <option value="July">July</option>
-                    <option value="August">August</option>
-                    <option value="September">September</option>
-                    <option value="October">October</option>
-                    <option value="November">November</option>
-                    <option value="December">December</option>
-                </select>
-            </div>
-            <div class="col-md-1 col-sm-4 col-xs-4">
-                <h4>Year</h4>
-                <select class="yearSelectionList"></select>
-            </div>
-            <div class="col-md-1 col-sm-4 col-xs-4">
-                <h5><a class="reset btn btn-primary btn-sm" id="update">Update</a></h5>
+            <div class="col-md-3 col-sm-12 col-xs-12" id="dateSelect">
+                <div>
+                    <h4>Month</h4>
+                    <select class="monthSelectionList">
+                        <option value="January">January</option>
+                        <option value="February">February</option>
+                        <option value="March">March</option>
+                        <option value="April">April</option>
+                        <option value="May">May</option>
+                        <option value="June">June</option>
+                        <option value="July">July</option>
+                        <option value="August">August</option>
+                        <option value="September">September</option>
+                        <option value="October">October</option>
+                        <option value="November">November</option>
+                        <option value="December">December</option>
+                    </select>
+                </div>
+                <div>
+                    <h4>Year</h4>
+                    <select class="yearSelectionList"></select>
+                </div>
+                <div>
+                    <h5><a class="reset btn btn-primary btn-sm" id="update">Update</a></h5>
+                </div>
             </div>
                 <!-- Modal -->
                 <div id="myModal" class="modal fade" role="dialog">
@@ -87,18 +93,18 @@
         <hr>
         <div class="row">
             <div class="col-md-2 col-sm-6 col-xs-6" id="numbers">
-                <p id="peopleAssisted"></p>
                 <h4 class="header">People assisted</h4>
-                <span class="small">People assisted is the sum of people receiving cash-based assistance across all sectors, in the selected month.(<a href="#more-people-assisted">See more</a>)</span>
+                <p id="peopleAssisted"></p>
+                <span class="small">People assisted is the sum of people receiving cash-based assistance across all sectors, in the selected month. (<a href="#more-people-assisted">See more</a>)</span>
             </div>
             <div class="col-md-2 col-sm-6 col-xs-6" id="numbers">
-                <p id="amountTransfered"></p>
                 <h4 class="header">Value transferred</h4>
-                <span class="small">Value transferred is the sum of the USD value of the cash-based assistance transferred to people in the selected month.(<a href="#more-people-assisted">See more</a>)</span>
+                <p id="amountTransfered"></p>
+                <span class="small">Value transferred is the sum of the USD value of the cash-based assistance transferred to people in the selected month. (<a href="#more-people-assisted">See more</a>)</span>
             </div> 
             <div class="col-md-2 col-sm-6 col-xs-6" id="numbers">
-                <p id="numberOfOrgs"></p>
                 <h4 class="header">Number of partners</h4>
+                <p id="numberOfOrgs"></p>
             </div>
             <div class="col-md-6 col-sm-6 col-xs-12">
                 <div id="yearlyChart"></div>
@@ -106,7 +112,7 @@
         </div>  
         <hr>
         <div class="row monthly-viz-container">
-            <div class="row">
+            <div class="row mb-30">
                 <div class="col-md-3 col-sm-6 col-xs-12" id="filters">
                     <h4><a href="#more-conditionaly">Conditionality</a></h4>
                     <div id="filterConditionality"></div>
@@ -126,7 +132,7 @@
             </div>
 
             <!--  redesign-->
-            <div class="row">
+            <div class="row mb-30">
 
                 <div class="col-md-4">
                     <h4>Top 15 cash transfer by partner</h4>
@@ -142,13 +148,13 @@
                     <div class="row">
                         <h4>Cash transfer by district <a class=" btn btn-primary btn-sm reset" id="reset" href="javascript:dc.filterAll();dc.redrawAll();">Clear filters</a></h4>
                         <div id="hdx-3W-where" class="hdx-3w-chart"></div>
-                        <p class="small">The boundaries and names shown and the designations used on this map do not imply official endorsement or acceptance by the United Nations.</p>
+                        <p class="footnote small">The boundaries and names shown and the designations used on this map do not imply official endorsement or acceptance by the United Nations.</p>
                     </div>
                 </div>
             </div>
 
 
-            <div class="row">
+            <div class="row mb-30">
                 <div class="col-md-4">
                     <h4>Cash transfer by cluster (No. individuals)</h4>
                     <div id="hdx-3W-what" class="hdx-3w-chart"></div>

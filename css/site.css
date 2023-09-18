@@ -194,6 +194,21 @@ hr{
     transform: translate(-50%, -50%);
 }
 
+.alert-message {
+    background-color: #FDE9E8;
+    border: 1px solid #F2645A;
+    color: #000;
+    font-size: 16px;
+    text-align: center;
+}
+.alert-message a {
+    color: #F2645A;
+}
+.alert-message p {
+    margin: 0;
+    padding: 20px;
+}
+
 .sp {
     clear: both;
     height: 32px;
